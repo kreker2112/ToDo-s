@@ -257,7 +257,7 @@ onMounted(() => {
   border-radius: 25px;
   padding: 20px;
   color: white;
-  box-shadow: -3px -3px 10px rgba(255, 255, 255, 0.2);
+  box-shadow: -3px -3px 10px rgba(255, 255, 255, 0.11);
 }
 
 .q-item__section {
@@ -290,7 +290,7 @@ onMounted(() => {
   padding: 10px;
   color: white;
   text-align: left;
-  box-shadow: -3px -3px 10px rgba(255, 255, 255, 0.2);
+  box-shadow: -3px -3px 10px rgba(255, 255, 255, 0.144);
 }
 .task {
   display: flex;
