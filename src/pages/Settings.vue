@@ -12,21 +12,18 @@
           <q-item>
             <q-item-section>Completed Tasks</q-item-section>
             <q-item-section>
-              {{ completedTasks }}
+              {{ completedTasks.length }}
             </q-item-section>
           </q-item>
           <q-item>
             <q-item-section>Pending Tasks</q-item-section>
             <q-item-section>
-              {{ pendingTasks }}
+              {{ pendingTasks.length }}
             </q-item-section>
           </q-item>
-          <q-btn
-            class="q-mt-md"
-            label="Back to ToDos"
-            @click="goToToDos"
-            color="primary"
-          />
+          <router-link to="/" class="q-mt-md">
+            <q-btn label="Back to ToDos" color="primary" />
+          </router-link>
         </q-card-section>
       </q-card>
     </div>
@@ -35,21 +32,12 @@
 
 <script setup>
 import { computed } from "vue";
-import { useRouter } from "vue-router";
 
-const tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+const storedTaskList = JSON.parse(localStorage.getItem("tasks"));
+const tasks = storedTaskList || [];
 
-const completedTasks = computed(
-  () => tasks.filter((task) => task.completed).length
-);
-const pendingTasks = computed(
-  () => tasks.filter((task) => !task.completed).length
-);
-
-const router = useRouter();
-const goToToDos = () => {
-  router.push("/");
-};
+const completedTasks = computed(() => tasks.filter((task) => task.completed));
+const pendingTasks = computed(() => tasks.filter((task) => !task.completed));
 </script>
 
 <style scoped>

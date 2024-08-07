@@ -3,7 +3,9 @@
     <q-header elevated>
       <q-toolbar>
         <q-toolbar-title> To Do </q-toolbar-title>
-        <q-btn icon="settings" @click="$router.push('/settings')" flat round />
+        <router-link to="/settings" class="router-link" exact>
+          <q-icon name="settings" color="white" size="2.2rem" />
+        </router-link>
       </q-toolbar>
     </q-header>
 
@@ -12,8 +14,6 @@
     </q-page-container>
   </q-layout>
 </template>
-
-<script setup></script>
 
 <style scoped>
 .bg-dark {
