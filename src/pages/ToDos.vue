@@ -10,20 +10,12 @@
         @update:taskDate="taskDate = $event"
         @addTask="addTask"
       />
-      <TaskCategory
-        title="Today Tasks"
-        :tasks="todayTasks"
-        :isVisible="true"
-        @update-status="updateTaskStatus"
-      />
-      <TaskCategory
-        v-for="category in otherCategories"
-        :key="category.date"
-        :title="tasksBlockTitle(category.date)"
-        :tasks="category.tasks"
-        :isVisible="visibleCategories[category.date]"
-        @update-status="updateTaskStatus"
-        @toggle-visibility="toggleCategoryVisibility(category.date)"
+      <TodayTasks :tasks="todayTasks" @updateTaskStatus="updateTaskStatus" />
+      <OtherTasks
+        :categories="otherCategories"
+        :visibleCategories="visibleCategories"
+        @toggleCategoryVisibility="toggleCategoryVisibility"
+        @updateTaskStatus="updateTaskStatus"
       />
     </div>
   </q-page>
@@ -32,8 +24,9 @@
 <script setup>
 import { ref, computed } from "vue";
 import TaskInputs from "../components/TaskInputs.vue";
-import TaskCategory from "../components/TaskCategory.vue";
-import { getRandomColor, formatDate } from "../utils/utils";
+import TodayTasks from "../components/TodayTasks.vue";
+import OtherTasks from "../components/OtherTasks.vue";
+import { getRandomColor } from "../utils/utils";
 
 const newTask = ref("");
 const taskDescription = ref("");
@@ -44,9 +37,6 @@ const storedTaskList = JSON.parse(localStorage.getItem("tasks") || "[]");
 const tasks = ref(storedTaskList);
 
 const todayDate = new Date().toISOString().split("T")[0];
-const tomorrowDate = new Date();
-tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-const tomorrowDateString = tomorrowDate.toISOString().split("T")[0];
 
 const sortByDate = (items) => {
   return items.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -110,11 +100,11 @@ const updateTaskStatus = (task) => {
   localStorage.setItem("tasks", JSON.stringify(tasks.value));
 };
 
-const tasksBlockTitle = computed(() => (date) => {
-  return date === tomorrowDateString
-    ? "Tomorrow Tasks"
-    : `${formatDate(date)} Tasks`;
-});
+// const tasksBlockTitle = computed(() => (date) => {
+//   return date === tomorrowDateString
+//     ? "Tomorrow Tasks"
+//     : `${formatDate(date)} Tasks`;
+// });
 </script>
 
 <style scoped lang="scss">
