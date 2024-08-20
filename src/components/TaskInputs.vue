@@ -26,14 +26,13 @@
 </template>
 
 <script setup>
-import { ref, defineEmits, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { getRandomColor, sortByDate } from "../utils/utils";
 
 const taskName = ref("");
 const taskDescription = ref("");
 const taskDate = ref("");
 const taskInput = ref(null);
-const emit = defineEmits(["task-added"]);
 
 const addTask = () => {
   if (taskName.value && taskDate.value && taskDescription.value) {
@@ -50,7 +49,6 @@ const addTask = () => {
     taskName.value = "";
     taskDescription.value = "";
     taskDate.value = "";
-    emit("task-added");
     window.dispatchEvent(new Event("task-added"));
   } else {
     alert("Будь ласка, заповніть всі поля!");
