@@ -15,7 +15,7 @@
   </q-layout>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .bg-dark {
   background: #222222;
 }
