@@ -1,7 +1,7 @@
 <template>
   <div
     class="task-category"
-    v-for="category in categories"
+    v-for="category in otherCategories"
     :key="category.date"
   >
     <q-item>
@@ -16,7 +16,7 @@
           dense
           flat
           icon="keyboard_arrow_down"
-          @click="$emit('toggleCategoryVisibility', category.date)"
+          @click="toggleCategoryVisibility(category.date)"
         />
       </q-item-section>
     </q-item>
@@ -50,7 +50,7 @@
             color="green"
             unchecked-icon="clear"
             v-model="task.completed"
-            @update:model-value="$emit('updateTaskStatus', task)"
+            @update:model-value="updateTaskStatus(task)"
           />
         </q-item-section>
       </q-item>
@@ -59,15 +59,41 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits, computed } from "vue";
-import { formatDate } from "../utils/utils";
+import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
+import {
+  sortByDate,
+  formatDate,
+  loadTasksFromLocalStorage,
+  saveTasksToLocalStorage,
+} from "../utils/utils";
 
-const props = defineProps({
-  categories: Array,
-  visibleCategories: Object,
+const tasks = ref([]);
+const visibleCategories = ref({});
+
+const addToCategory = (categories, task) => {
+  if (!categories[task.date]) {
+    categories[task.date] = {
+      date: task.date,
+      tasks: [],
+    };
+  }
+  categories[task.date].tasks.push(task);
+};
+
+const otherCategories = computed(() => {
+  const todayDate = new Date().toISOString().split("T")[0];
+  const categories = tasks.value.reduce((acc, task) => {
+    if (task.date !== todayDate) {
+      addToCategory(acc, task);
+    }
+    return acc;
+  }, {});
+
+  return Object.values(categories).map((category) => ({
+    ...category,
+    tasks: sortByDate(category.tasks),
+  }));
 });
-
-const emit = defineEmits(["toggleCategoryVisibility", "updateTaskStatus"]);
 
 const tomorrowDate = new Date();
 tomorrowDate.setDate(tomorrowDate.getDate() + 1);
@@ -77,6 +103,31 @@ const tasksBlockTitle = computed(() => (date) => {
   return date === tomorrowDateString
     ? "Tomorrow Tasks"
     : `${formatDate(date)} Tasks`;
+});
+
+const toggleCategoryVisibility = (category) => {
+  visibleCategories.value[category] = !visibleCategories.value[category];
+};
+
+const loadTasks = () => {
+  tasks.value = loadTasksFromLocalStorage();
+};
+
+const updateTaskStatus = (task) => {
+  saveTasksToLocalStorage(tasks.value);
+};
+
+watch(tasks, (newTasks) => {
+  saveTasksToLocalStorage(newTasks);
+});
+
+onMounted(() => {
+  loadTasks();
+  window.addEventListener("task-added", loadTasks);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("task-added", loadTasks);
 });
 </script>
 

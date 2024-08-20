@@ -3,7 +3,7 @@
     <q-input
       class="task-name__input text-blue"
       v-model="taskName"
-      @keyup.enter="handleEnter"
+      @keyup.enter="addTask"
       placeholder="New Task"
       ref="taskInput"
       autogrow
@@ -11,14 +11,14 @@
     <q-input
       class="task-description__input"
       v-model="taskDescription"
-      @keyup.enter="handleEnter"
+      @keyup.enter="addTask"
       placeholder="Task Description"
       autogrow
     />
     <q-input
       v-model="taskDate"
       type="date"
-      @keyup.native.enter="handleEnter"
+      @keyup.native.enter="addTask"
       placeholder="Date"
       class="task-date__input"
     />
@@ -26,46 +26,36 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineEmits, defineProps, watch } from "vue";
+import { ref, defineEmits, onMounted } from "vue";
+import { getRandomColor, sortByDate } from "../utils/utils";
 
-const props = defineProps({
-  newTask: String,
-  taskDescription: String,
-  taskDate: String,
-});
-
-const emit = defineEmits([
-  "update:newTask",
-  "update:taskDescription",
-  "update:taskDate",
-  "addTask",
-]);
-
-const taskName = ref(props.newTask);
-const taskDescription = ref(props.taskDescription);
-const taskDate = ref(props.taskDate);
+const taskName = ref("");
+const taskDescription = ref("");
+const taskDate = ref("");
 const taskInput = ref(null);
+const emit = defineEmits(["task-added"]);
 
-const handleEnter = () => {
-  emit("addTask");
+const addTask = () => {
+  if (taskName.value && taskDate.value && taskDescription.value) {
+    const tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+    tasks.push({
+      id: Date.now(),
+      name: taskName.value,
+      description: taskDescription.value,
+      color: getRandomColor(),
+      date: taskDate.value,
+      completed: false,
+    });
+    localStorage.setItem("tasks", JSON.stringify(sortByDate(tasks)));
+    taskName.value = "";
+    taskDescription.value = "";
+    taskDate.value = "";
+    emit("task-added");
+    window.dispatchEvent(new Event("task-added"));
+  } else {
+    alert("Будь ласка, заповніть всі поля!");
+  }
 };
-
-watch(
-  () => props.newTask,
-  (newValue) => (taskName.value = newValue)
-);
-watch(
-  () => props.taskDescription,
-  (newValue) => (taskDescription.value = newValue)
-);
-watch(
-  () => props.taskDate,
-  (newValue) => (taskDate.value = newValue)
-);
-
-watch(taskName, (newValue) => emit("update:newTask", newValue));
-watch(taskDescription, (newValue) => emit("update:taskDescription", newValue));
-watch(taskDate, (newValue) => emit("update:taskDate", newValue));
 
 onMounted(() => {
   if (taskInput.value) {

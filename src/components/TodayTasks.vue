@@ -11,7 +11,7 @@
       </q-item-section>
     </q-item>
     <q-list>
-      <q-item v-for="task in tasks" :key="task.id" class="task-item">
+      <q-item v-for="task in todayTasks" :key="task.id" class="task-item">
         <div
           class="task-color-bar"
           :style="{ backgroundColor: task.color }"
@@ -40,7 +40,7 @@
             color="green"
             unchecked-icon="clear"
             v-model="task.completed"
-            @update:model-value="$emit('updateTaskStatus', task)"
+            @update:model-value="updateTaskStatus(task)"
           />
         </q-item-section>
       </q-item>
@@ -49,13 +49,40 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
+import {
+  sortByDate,
+  loadTasksFromLocalStorage,
+  saveTasksToLocalStorage,
+} from "../utils/utils";
 
-const props = defineProps({
-  tasks: Array,
+const tasks = ref([]);
+const todayDate = new Date().toISOString().split("T")[0];
+
+const todayTasks = computed(() => {
+  return sortByDate(tasks.value.filter((task) => task.date === todayDate));
 });
 
-const emit = defineEmits(["updateTaskStatus"]);
+const loadTasks = () => {
+  tasks.value = loadTasksFromLocalStorage();
+};
+
+const updateTaskStatus = (task) => {
+  saveTasksToLocalStorage(tasks.value);
+};
+
+onMounted(() => {
+  loadTasks();
+  window.addEventListener("task-added", loadTasks);
+});
+
+watch(tasks, (newTasks) => {
+  saveTasksToLocalStorage(newTasks);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("task-added", loadTasks);
+});
 </script>
 
 <style scoped lang="scss">
